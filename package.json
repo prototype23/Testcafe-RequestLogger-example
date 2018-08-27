@@ -1,0 +1,15 @@
+{
+  "name": "Testcafe-RequestLogger-example",
+  "version": "1.0.0",
+  "description": "See question [here](https://stackoverflow.com/questions/51972855/how-to-get-the-json-response-of-a-requestlogger)",
+  "main": "loggerResponse.js",
+  "scripts": {
+    "test": "testcafe firefox loggerResponse.js --debug-on-fail"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "testcafe": "^0.21.1"
+  }
+}

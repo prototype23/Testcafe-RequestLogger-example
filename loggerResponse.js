@@ -31,7 +31,7 @@ fixture('loggerResponse')
   .page(aSiteWithjQuery);
 
 test
-  .requestHooks(logger)('test over http', async t => {
+  .requestHooks(logger)('test', async t => {
     // Wait a little so we can open developer tools > Network tab.
     await t.wait(5000);
 
