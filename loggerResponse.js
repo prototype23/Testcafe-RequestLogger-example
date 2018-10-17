@@ -1,4 +1,6 @@
 import {RequestLogger, ClientFunction} from 'testcafe';
+import zlib from 'zlib';
+
 // https://jsonplaceholder.typicode.com/
 const apiCall = 'http://jsonplaceholder.typicode.com/users/1'; // You can use the https call: 'https://jsonplaceholder.typicode.com/users/1';
 const aSiteWithjQuery = 'https://jquery.com/';                 // You can place a local page of yours that has jQuery.
@@ -7,7 +9,7 @@ const aSiteWithjQuery = 'https://jquery.com/';                 // You can place 
 const logger = RequestLogger(apiCall, {
   logRequestBody: true,
   logResponseBody: true,
-  stringifyResponseBody: true,
+  stringifyResponseBody: false,
   logResponseHeaders: true
 });
 
@@ -25,6 +27,18 @@ const ajaxRequest = ClientFunction(() => {
   dependencies: {
     testUrl: apiCall
   }
+});
+/**
+ *
+ * @param {buffer} body
+ */
+const getBody = async body => new Promise((resolve, reject) => {
+  zlib.gunzip(body, async (error, buff) => {
+    if (error !== null) {
+      return reject(error);
+    }
+    return resolve(JSON.parse(buff.toString()));
+  });
 });
 
 fixture('loggerResponse')
@@ -50,8 +64,12 @@ test
 
     console.log('\n', 'Response taken by the logger:\n', logRecord.response.body);
 
+    const unZippedBody = await (getBody(logRecord.response.body));
+
+    console.log('\n', 'Response taken by the logger (unZipped):\n', unZippedBody);
+
     // Try to make it json (it will fail)
-    console.log(JSON.parse(logRecord.response.body));
+    // console.log(JSON.parse(unZippedBody));
 
     // Wait one minute, incase test did not start with -debug-on-fail
     await t.wait(60000);

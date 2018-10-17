@@ -10,6 +10,6 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "testcafe": "^0.21.1"
+    "testcafe": "^0.22.0"
   }
 }
