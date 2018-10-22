@@ -49,8 +49,8 @@ test
 
     console.log('\nResponse taken by the logger:\n', logger.requests[0].response.body);
 
-    // Unzip any zipped server responses on the logger.
-    await requestLoggerUtils.unzipLoggerResponses(t, {requestLogger: logger});
+    // Unzip any zipped server responses on the logger and convert them to json.
+    await requestLoggerUtils.unzipLoggerResponses(t, {requestLogger: logger, toJson: true});
 
     console.log('\nUnzipped Response taken by the logger:\n', logger.requests[0].response.body);
   });

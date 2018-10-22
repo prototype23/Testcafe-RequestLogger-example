@@ -12,18 +12,25 @@ export default class requestLoggerUtilities {
    * Unzips a response buffer from a testcafe requestlogger.🍓
    *
    * @param {*} t testcafe testController
-   * @param {object} options Any user params.
-   * @param {buffer} options.body The response body of your request you want to unzip and convert to json.
-   * @returns {promise} Returns a promise with the result. Result will be a parsed json.
+   * @param {object}  options                   Any user params.
+   * @param {buffer}  options.body              The response body of your request you want to unzip and convert to json.
+   * @param {boolean} [options.toJson=false]    If true result will be return in json.
+   * @param {boolean} [options.toString=false]  If true result will be return to string (using buffer.toString()).
+   * @returns {promise} Returns a promise with the result. Result will be a buffer (default) a json or a string.
    */
-  async bodyToJson (t, options) {
+  async unzipResponseBody (t, options) {
     return new Promise((resolve, reject) => {
       zlib.gunzip(options.body, async (error, buff) => {
         if (error !== null) {
           return reject(error);
         }
-        // console.log('\nbodytoJson results:', JSON.parse(buff.toString()));
-        return resolve(JSON.parse(buff.toString()));
+        if (options.toJson === true) {
+          return resolve(JSON.parse(buff.toString()));
+        } else if (options.toString === true) {
+          return resolve(buff.toString());
+        } else {
+          return resolve(buff);
+        }
       });
     });
   }
@@ -32,13 +39,15 @@ export default class requestLoggerUtilities {
    * Iterates throught a request logger and unzips any zipped response bodies. 🍒
    * Zipped bodies are dectected via the response.headers['content-encoding'] value which must be present with a value 'gzip'.
    * Your testcafe request logger should be initialized with `logResponseHeaders=true` otherwise no headers will not be present.
-   * @implements {this.bodyToJson}
+   * @implements {this.unzipResponseBody}
    * @see http://devexpress.github.io/testcafe/documentation/test-api/intercepting-http-requests/logging-http-requests.html#logger-properties
-   * @param {*}      t testcafe testController
-   * @param {object} options Any user params.
-   * @param {buffer} options.requestLogger The request logger.
+   * @param {*}      t                          Testcafe testController
+   * @param {object} options                    Any user params.
+   * @param {buffer} options.requestLogger      The request logger.
+   * @param {boolean} [options.toJson=false]    If true response bodies will be replaced by a json.
+   * @param {boolean} [options.toString=false]  If true response bodies will be replaced by astring (using buffer.toString()).
    * @returns {promise} Returns a promise so you can await the action to be finished. No actual data are returned.
-   *                    Manipulaltes the options.requestLogger.requests directly!
+   *                    Manipulates the options.requestLogger.requests directly!
    */
   async unzipLoggerResponses(t, options) {
     let self = this;
@@ -49,7 +58,11 @@ export default class requestLoggerUtilities {
         if (value.response && value.response.headers && value.response.headers['content-encoding'] === 'gzip'
           && Buffer.isBuffer(value.response.body)) {
             // Update the value directly on the logger reference!
-            requests[key].response.body = await self.bodyToJson(t, {body: value.response.body});
+            requests[key].response.body = await self.unzipResponseBody(t, {
+              body: value.response.body,
+              toJson: options.toJson,
+              toString: options.toString
+            });
         }
       }));
     } catch (er) {
