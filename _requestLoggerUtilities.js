@@ -36,8 +36,8 @@ export default class requestLoggerUtilities {
   }
 
   /**
-   * Iterates throught a request logger and unzips any zipped response bodies. 🍒
-   * Zipped bodies are dectected via the response.headers['content-encoding'] value which must be present with a value 'gzip'.
+   * Iterates through a request logger and unzips any zipped response bodies. 🍒
+   * Zipped bodies are detected via the response.headers['content-encoding'] value which must be present with a value 'gzip'.
    * Your testcafe request logger should be initialized with `logResponseHeaders=true` otherwise no headers will not be present.
    * @implements {this.unzipResponseBody}
    * @see http://devexpress.github.io/testcafe/documentation/test-api/intercepting-http-requests/logging-http-requests.html#logger-properties
@@ -45,7 +45,7 @@ export default class requestLoggerUtilities {
    * @param {object} options                    Any user params.
    * @param {buffer} options.requestLogger      The request logger.
    * @param {boolean} [options.toJson=false]    If true response bodies will be replaced by a json.
-   * @param {boolean} [options.toString=false]  If true response bodies will be replaced by astring (using buffer.toString()).
+   * @param {boolean} [options.toString=false]  If true response bodies will be replaced by a string (using buffer.toString()).
    * @returns {promise} Returns a promise so you can await the action to be finished. No actual data are returned.
    *                    Manipulates the options.requestLogger.requests directly!
    */
