@@ -1,5 +1,5 @@
 import {RequestLogger, ClientFunction} from 'testcafe';
-import zlib from 'zlib';
+import requestLoggerUtilities from './_requestLoggerUtilities.js';
 
 // https://jsonplaceholder.typicode.com/
 const apiCall = 'http://jsonplaceholder.typicode.com/users/1'; // You can use the https call: 'https://jsonplaceholder.typicode.com/users/1';
@@ -28,18 +28,8 @@ const ajaxRequest = ClientFunction(() => {
     testUrl: apiCall
   }
 });
-/**
- *
- * @param {buffer} body
- */
-const getBody = async body => new Promise((resolve, reject) => {
-  zlib.gunzip(body, async (error, buff) => {
-    if (error !== null) {
-      return reject(error);
-    }
-    return resolve(JSON.parse(buff.toString()));
-  });
-});
+
+const requestLoggerUtils = new requestLoggerUtilities();
 
 fixture('loggerResponse')
   .page(aSiteWithjQuery);
@@ -52,26 +42,16 @@ test
     // Make an ajax request.
     const response = await ajaxRequest();
 
-    console.log('Response taken via clientFunction:\n ', response);
-
-    // Wait a little (not needed in specific test, we have a promised client function, but added for testing).
-    // await t.wait(5000);
+    console.log('\nResponse taken via clientFunction:\n ', response);
 
     // Validate logger
     await t.expect(logger.contains(record => record.response.statusCode === 200)).ok();
 
-    const logRecord = logger.requests[0];
+    console.log('\nResponse taken by the logger:\n', logger.requests[0].response.body);
 
-    console.log('\n', 'Response taken by the logger:\n', logRecord.response.body);
+    // Unzip any zipped server responses on the logger.
+    await requestLoggerUtils.unzipLoggerResponses(t, {requestLogger: logger});
 
-    const unZippedBody = await (getBody(logRecord.response.body));
-
-    console.log('\n', 'Response taken by the logger (unZipped):\n', unZippedBody);
-
-    // Try to make it json (it will fail)
-    // console.log(JSON.parse(unZippedBody));
-
-    // Wait one minute, incase test did not start with -debug-on-fail
-    await t.wait(60000);
+    console.log('\nUnzipped Response taken by the logger:\n', logger.requests[0].response.body);
   });
 
